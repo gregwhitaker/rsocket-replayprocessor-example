@@ -1,6 +1,9 @@
 # rsocket-replayprocessor-example
 An example of storing and replaying messages when a new subscriber connects using [Project Reactor](https://projectreactor.io/) and [RSocket](http://rsocket.io).
 
+In this example, the `count-service` is generating a stream of numbers from `1` to `100` at a one second interval. When a `count-client` connects it
+requests a stream of the numbers. A `ReplayProcessor` handles catching the client up by replaying all previously generated numbers before it connected.
+
 ## Building the Example
 Run the following command to build the example:
 
