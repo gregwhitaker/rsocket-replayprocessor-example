@@ -19,7 +19,7 @@ import java.math.BigInteger;
 public class CountService {
     private static final Logger LOG = LoggerFactory.getLogger(CountService.class);
 
-    public static void main(String... args) {
+    public static void main(String... args) throws Exception {
         RSocketFactory.receive()
                 .frameDecoder(PayloadDecoder.DEFAULT)
                 .acceptor(new SocketAcceptor() {
@@ -41,5 +41,9 @@ public class CountService {
                 .transport(TcpServerTransport.create(7000))
                 .start()
                 .block();
+
+        LOG.info("RSocket server started on port: 7000");
+
+        Thread.currentThread().join();
     }
 }
