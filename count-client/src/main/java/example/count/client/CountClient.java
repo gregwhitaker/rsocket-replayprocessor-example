@@ -20,16 +20,18 @@ public class CountClient {
                 .start()
                 .block();
 
-        CountDownLatch latch = new CountDownLatch(10);
+        CountDownLatch latch = new CountDownLatch(1);
 
         rSocket.requestStream(DefaultPayload.create(Unpooled.EMPTY_BUFFER))
+                .doOnComplete(() -> {
+                    LOG.info("Done");
+                    latch.countDown();
+                })
                 .subscribe(payload -> {
                     byte[] bytes = new byte[payload.data().readableBytes()];
                     payload.data().readBytes(bytes);
 
                     LOG.info("Received: {}", new BigInteger(bytes).intValue());
-
-                    latch.countDown();
                 });
 
         latch.await();

@@ -12,14 +12,20 @@ import io.rsocket.util.DefaultPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ReplayProcessor;
 
 import java.math.BigInteger;
+import java.time.Duration;
 
 public class CountService {
     private static final Logger LOG = LoggerFactory.getLogger(CountService.class);
 
     public static void main(String... args) throws Exception {
+        final ReplayProcessor<Integer> replayProcessor = ReplayProcessor.create();
+        final FluxSink<Integer> rpSink = replayProcessor.sink(FluxSink.OverflowStrategy.DROP);
+
         RSocketFactory.receive()
                 .frameDecoder(PayloadDecoder.DEFAULT)
                 .acceptor(new SocketAcceptor() {
@@ -28,12 +34,7 @@ public class CountService {
                         return Mono.just(new AbstractRSocket() {
                             @Override
                             public Flux<Payload> requestStream(Payload payload) {
-                                return Flux.create(payloadFluxSink -> {
-                                    for (int i = 0; i < 10; i++) {
-                                        LOG.info("Sending: {}", i);
-                                        payloadFluxSink.next(DefaultPayload.create(BigInteger.valueOf(i).toByteArray()));
-                                    }
-                                });
+                                return replayProcessor.map(i -> DefaultPayload.create(BigInteger.valueOf(i).toByteArray()));
                             }
                         });
                     }
@@ -43,6 +44,11 @@ public class CountService {
                 .block();
 
         LOG.info("RSocket server started on port: 7000");
+
+        Flux.range(1, 100)
+                .delayElements(Duration.ofSeconds(1))
+                .doOnComplete(rpSink::complete)
+                .subscribe(rpSink::next);
 
         Thread.currentThread().join();
     }
