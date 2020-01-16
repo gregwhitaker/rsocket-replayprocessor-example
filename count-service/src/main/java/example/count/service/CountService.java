@@ -19,6 +19,9 @@ import reactor.core.publisher.ReplayProcessor;
 import java.math.BigInteger;
 import java.time.Duration;
 
+/**
+ * Service that counts up from 1 to 100, in one second intervals, and returns the stream, with history, back to subscribers.
+ */
 public class CountService {
     private static final Logger LOG = LoggerFactory.getLogger(CountService.class);
 
@@ -45,6 +48,8 @@ public class CountService {
 
         LOG.info("RSocket server started on port: 7000");
 
+        // Start counting up immediately on service start and storing
+        // the results into the ReplayProcessor
         Flux.range(1, 100)
                 .delayElements(Duration.ofSeconds(1))
                 .doOnComplete(rpSink::complete)

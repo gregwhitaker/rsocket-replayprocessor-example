@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * Client that requests a stream of integers from the count-service.
+ */
 public class CountClient {
     private static final Logger LOG = LoggerFactory.getLogger(CountClient.class);
 
