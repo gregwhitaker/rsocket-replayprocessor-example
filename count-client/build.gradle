@@ -1,7 +1,9 @@
 plugins {
     id "java"
+    id "application"
 }
 
+mainClassName = 'example.count.client.CountClient'
 sourceCompatibility = 1.8
 
 dependencies {
